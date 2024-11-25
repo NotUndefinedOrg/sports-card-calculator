@@ -90,6 +90,29 @@
             color: #666;
             font-size: 0.9em;
         }
+        /* Add new styles for documentation */
+        .documentation {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .doc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .doc-section h3 {
+            color: #0066cc;
+            margin-top: 0;
+        }
+        .doc-notes {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -99,8 +122,66 @@
             <button onclick="switchLanguage('zh')" id="zhBtn">中文</button>
         </div>
         
-        <h2 id="title">Sports Card Grading Profit Calculator</h2>
+        <h2 id="title">Sports Card Grading Business Profit Calculator</h2>
         
+        <div class="documentation">
+            <h2 id="docTitle">Guide</h2>
+            
+            <div class="doc-grid">
+                <div class="doc-section">
+                    <h3 id="aboutTitle">About This Tool</h3>
+                    <p id="aboutDesc">This calculator helps you analyze the profitability of a sports card grading business model. It considers:</p>
+                    <ul id="aboutList">
+                        <li>Initial investment in raw cards</li>
+                        <li>PSA grading costs and timelines</li>
+                        <li>Success rates for different PSA grades</li>
+                        <li>eBay selling fees and timelines</li>
+                        <li>Projected profits for both single cycle and yearly operations</li>
+                    </ul>
+                </div>
+                
+                <div class="doc-section">
+                    <h3 id="howToTitle">How to Use</h3>
+                    <ol>
+                        <li><strong id="inputParamsTitle">Input Parameters:</strong>
+                            <ul id="inputList">
+                                <li>Number of cards to buy</li>
+                                <li>Cost per raw card</li>
+                                <li>Percentage worth grading</li>
+                                <li>PSA grading fee</li>
+                                <li>Expected PSA 10 success rate</li>
+                                <li>PSA 10 value multiplier</li>
+                                <li>eBay fee percentage</li>
+                            </ul>
+                        </li>
+                        <li><strong id="timelineTitle">Timeline Settings:</strong>
+                            <ul id="timelineList">
+                                <li>Days for PSA grading</li>
+                                <li>Days for selling cards</li>
+                            </ul>
+                        </li>
+                        <li><strong id="reviewTitle">Review Results:</strong>
+                            <ul id="reviewList">
+                                <li>Single cycle profit with detailed breakdown</li>
+                                <li>Yearly projections</li>
+                                <li>ROI calculations</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="doc-notes">
+                <h3 id="importantTitle">Important Notes</h3>
+                <ul id="importantList">
+                    <li>All calculations include eBay fees in total costs</li>
+                    <li>ROI is calculated based on total costs including fees</li>
+                    <li>Timeline projections assume consistent turnaround times</li>
+                    <li>Switch between English and Chinese using the language buttons</li>
+                </ul>
+            </div>
+        </div>
+
         <div class="input-group">
             <div class="input-row">
                 <div class="input-column">
@@ -151,7 +232,7 @@
         const translations = {
             en: {
 				roi: "Return on Investment",
-                title: "Sports Card Trading Profit Calculator",
+                title: "Sports Card Grading Business Profit Calculator",
                 numCards: "Number of raw cards to buy:",
                 costPerCard: "Cost per raw card ($):",
                 percentageWorthGrading: "Percentage of cards worth grading (%):",
@@ -178,7 +259,46 @@
                 portfolioGrowth: "Portfolio Growth Over Time",
                 month: "Month",
                 portfolioValue: "Portfolio Value ($)",
-				totalCosts: "Total Costs:"
+				totalCosts: "Total Costs:",
+                docTitle: "Guide",
+                aboutTitle: "About This Tool",
+                aboutDesc: "This calculator helps you analyze the profitability of a sports card grading business model. It considers:",
+                aboutList: [
+                    "Initial investment in raw cards",
+                    "PSA grading costs and timelines",
+                    "Success rates for different PSA grades",
+                    "eBay selling fees and timelines",
+                    "Projected profits for both single cycle and yearly operations"
+                ],
+                inputList: [
+                    "Number of cards to buy",
+                    "Cost per raw card",
+                    "Percentage worth grading",
+                    "PSA grading fee",
+                    "Expected PSA 10 success rate",
+                    "PSA 10 value multiplier",
+                    "eBay fee percentage"
+                ],
+                timelineList: [
+                    "Days for PSA grading",
+                    "Days for selling cards"
+                ],
+                reviewList: [
+                    "Single cycle profit with detailed breakdown",
+                    "Yearly projections",
+                    "ROI calculations"
+                ],
+                howToTitle: "How to Use",
+                inputParamsTitle: "Input Parameters",
+                timelineTitle: "Timeline Settings",
+                reviewTitle: "Review Results",
+                importantTitle: "Important Notes",
+                importantList: [
+                    "All calculations include eBay fees in total costs",
+                    "ROI is calculated based on total costs including fees",
+                    "Timeline projections assume consistent turnaround times",
+                    "Switch between English and Chinese using the language buttons"
+                ]
             },
             zh: {
 				totalCosts: "总成本：",
@@ -209,7 +329,47 @@
                 cards: "张",
                 portfolioGrowth: "投资组合随时间增长",
                 month: "月份",
-                portfolioValue: "投资组合价值 ($)"
+                portfolioValue: "投资组合价值 ($)",
+                docTitle: "简介",
+                aboutTitle: "关于此工具",
+                aboutDesc: "此计算器帮助您分析体育卡评级业务模式的盈利能力。它考虑了：",
+                aboutList: [
+                    "原始卡片的初始投资",
+                    "PSA评级成本和时间",
+                    "不同PSA等级的成功率",
+                    "eBay销售费用和时间",
+                    "单次周期和年度运营的预计利润"
+                ],
+                inputList: [
+                    "购买卡片数量",
+                    "原始卡片成本",
+                    "值得评级的比例",
+                    "PSA评级费用",
+                    "预期PSA 10成功率",
+                    "PSA 10价值倍数",
+                    "eBay费用百分比"
+                ],
+                timelineList: [
+                    "PSA评级所需天数",
+                    "卡片销售所需天数"
+                ],
+                reviewList: [
+                    "单次周期详细利润分析",
+                    "年度预测",
+                    "投资回报率计算",
+                    "投资组合价值与成本图表"
+                ],
+                howToTitle: "使用方法",
+                inputParamsTitle: "输入参数",
+                timelineTitle: "时间设置",
+                reviewTitle: "查看结果",
+                importantTitle: "重要提示",
+                importantList: [
+                    "所有计算包含eBay费用在总成本中",
+                    "投资回报率基于包含费用的总成本计算",
+                    "时间预测假设周转时间一致",
+                    "使用语言按钮切换中英文"
+                ],
             }
         };
 
@@ -218,6 +378,58 @@
 
         function switchLanguage(lang) {
             currentLang = lang;
+
+            // Update documentation section
+            document.getElementById('docTitle').textContent = translations[lang].docTitle;
+            document.getElementById('aboutTitle').textContent = translations[lang].aboutTitle;
+            document.getElementById('aboutDesc').textContent = translations[lang].aboutDesc;
+            
+            // Update about list
+            const aboutListItems = document.getElementById('aboutList').children;
+            translations[lang].aboutList.forEach((text, index) => {
+                if (aboutListItems[index]) {
+                    aboutListItems[index].textContent = text;
+                }
+            });
+
+            // Update input list
+            const inputListItems = document.getElementById('inputList').children;
+            translations[lang].inputList.forEach((text, index) => {
+                if (inputListItems[index]) {
+                    inputListItems[index].textContent = text;
+                }
+            });
+
+            // Update timeline list
+            const timelineListItems = document.getElementById('timelineList').children;
+            translations[lang].timelineList.forEach((text, index) => {
+                if (timelineListItems[index]) {
+                    timelineListItems[index].textContent = text;
+                }
+            });
+
+            // Update review list
+            const reviewListItems = document.getElementById('reviewList').children;
+            translations[lang].reviewList.forEach((text, index) => {
+                if (reviewListItems[index]) {
+                    reviewListItems[index].textContent = text;
+                }
+            });
+
+            document.getElementById('howToTitle').textContent = translations[lang].howToTitle;
+            document.getElementById('inputParamsTitle').textContent = translations[lang].inputParamsTitle;
+            document.getElementById('timelineTitle').textContent = translations[lang].timelineTitle;
+            document.getElementById('reviewTitle').textContent = translations[lang].reviewTitle;
+            document.getElementById('importantTitle').textContent = translations[lang].importantTitle;
+
+            // Update important notes list
+            const importantListItems = document.getElementById('importantList').children;
+            translations[lang].importantList.forEach((text, index) => {
+                if (importantListItems[index]) {
+                    importantListItems[index].textContent = text;
+                }
+            });
+
             const elements = [
                 'title', 'labelNumCards', 'labelCostPerCard', 'labelPercentageWorthGrading',
                 'labelGradingFee', 'labelPsa10Percentage', 'labelPsa10Multiplier', 
@@ -259,7 +471,7 @@
 			
 			const gradingCosts = cardsToGrade * gradingFee;
 			const psa10Sales = psa10Cards * (costPerCard * psa10Multiplier);
-			const psa9Sales = psa9Cards * 20;
+			const psa9Sales = psa9Cards * costPerCard;
 			
 			const gradedSalesEbayFees = (psa10Sales + psa9Sales) * ebayFeePercentage;
 			// Calculate total revenue without deducting eBay fees
@@ -283,7 +495,7 @@
 				<p>${t.immediateResale} <span class="formula">($${costPerCard} × ${cardsToResell} × 0.9) × (1 - ${ebayFeePercentage}) = $${immediateResaleNet.toFixed(2)}</span></p>
 				<p>${t.gradingCosts} <span class="formula">$${gradingFee} × ${cardsToGrade} = $${gradingCosts.toFixed(2)}</span></p>
 				<p>${t.psa10Sales} (${psa10Cards} ${t.cards}): <span class="formula">$${costPerCard * psa10Multiplier} × ${psa10Cards} = $${psa10Sales.toFixed(2)}</span></p>
-				<p>${t.psa9Sales} (${psa9Cards} ${t.cards}): <span class="formula">$20 × ${psa9Cards} = $${psa9Sales.toFixed(2)}</span></p>
+				<p>${t.psa9Sales} (${psa9Cards} ${t.cards}): <span class="formula">${costPerCard} × ${psa9Cards} = $${psa9Sales.toFixed(2)}</span></p>
 				<p>${t.ebayFees} <span class="formula">Initial resale fees: $${ebayFee.toFixed(2)} + Graded sales fees: $${gradedSalesEbayFees.toFixed(2)} = $${(ebayFee + gradedSalesEbayFees).toFixed(2)}</span></p>
 				<p>${t.totalCosts} <span class="formula">Initial investment ($${initialInvestment.toFixed(2)}) + Grading costs ($${gradingCosts.toFixed(2)}) + Total eBay fees ($${(ebayFee + gradedSalesEbayFees).toFixed(2)}) = $${totalCosts.toFixed(2)}</span></p>
 				<p class="${profit >= 0 ? 'profit-positive' : 'profit-negative'}">
