@@ -98,11 +98,141 @@
             flex-direction: column;
             gap: 2px;
         }
+
+        .loading-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 16px;
+            z-index: 50;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            color: #4b5563;
+            font-size: 0.875rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Updated pagination styles */
+        .table-container {
+            position: relative;
+            min-height: 200px;
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 24px 0;
+            padding: 0 16px;
+        }
+
+        .page-button {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-button:hover:not(:disabled) {
+            background: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        .page-button:active:not(:disabled) {
+            background: #f3f4f6;
+            transform: translateY(1px);
+        }
+
+        .page-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .button-icon {
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        .page-info {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.875rem;
+            color: #6b7280;
+            padding: 0 8px;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        #currentPage, #totalPages {
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .player-group {
+            background-color: #ffffff;
+        }
+
+        .player-group:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        /* Add a top border for each player group */
+        .player-group:not(:first-child) {
+            border-top: 2px solid #e2e8f0;
+        }
+
+        /* Adjust the grade rows within each group */
+        .grade-row {
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        /* Remove bottom border from the last grade row in each group */
+        .player-group .grade-row:last-child {
+            border-bottom: none;
+        }
     </style>
 </head>
 <body>
     <div class="table-container">
         <table class="stats-table">
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Loading data...</div>
+            </div>
             <thead>
                 <tr>
                     <th rowspan="2">Player</th>
@@ -125,9 +255,43 @@
                 <!-- Data will be populated here -->
             </tbody>
         </table>
+
+        <div class="pagination">
+            <button id="firstPage" class="page-button" disabled>
+                <span class="button-icon">««</span>
+                <span class="button-text">First</span>
+            </button>
+            <button id="prevPage" class="page-button" disabled>
+                <span class="button-icon">«</span>
+                <span class="button-text">Previous</span>
+            </button>
+            <span class="page-info">Page <span id="currentPage">1</span> of <span id="totalPages">1</span></span>
+            <button id="nextPage" class="page-button">
+                <span class="button-text">Next</span>
+                <span class="button-icon">»</span>
+            </button>
+        </div>
     </div>
 
     <script>
+        let currentPage = 1;
+        let totalPages = 1;
+
+        // Add event listeners for pagination
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 1) {
+                fetchData(currentPage - 1);
+            }
+        });
+
+        document.getElementById('nextPage').addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                fetchData(currentPage + 1);
+            }
+        });
+
+        // Initial load
+        fetchData(1);
         function formatPrice(price) {
             return new Intl.NumberFormat('en-US', { 
                 style: 'currency', 
@@ -155,8 +319,9 @@
 
         function renderCard(data) {
             return `
+                <tbody class="player-group">
                 <!-- Raw card row -->
-                <tr>
+                <tr class="grade-row">
                     <td rowspan="3">
                         <div class="player-cell">
                             <img src="${data.avatar || '/api/placeholder/40/40'}" class="player-avatar" alt="${data.player_name}">
@@ -210,7 +375,7 @@
                 </tr>
                 
                 <!-- PSA 10 row -->
-                <tr>
+                <tr class="grade-row">
                     <td><span class="grade-badge grade-psa10">PSA 10</span></td>
                     <td class="number">
                         <div class="stats-group">
@@ -251,7 +416,7 @@
                 </tr>
                 
                 <!-- PSA 9 row -->
-                <tr>
+                <tr class="grade-row">
                     <td><span class="grade-badge grade-psa9">PSA 9</span></td>
                     <td class="number">
                         <div class="stats-group">
@@ -290,23 +455,99 @@
                         </div>
                     </td>
                 </tr>
+                </tbody>
             `;
         }
 
-        // Example of how to use the rendered data
-        async function fetchData() {
+        function showLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.classList.add('active');
+        }
+
+        function hideLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.classList.remove('active');
+        }
+
+        // Update the fetchData function
+        async function fetchData(page = 1) {
             try {
-                const response = await fetch('https://card-stats-api.notundefinedorg.workers.dev?sortBy=raw_seven_day_sales&sortOrder=desc&pageSize=100');
-                const data = await response.json();
-                const tableBody = document.getElementById('tableBody');
-                tableBody.innerHTML = data.data.map(renderCard).join('');
+                showLoading();
+                const response = await fetch(`https://card-stats-api.notundefinedorg.workers.dev?page=${page}&pageSize=20&sortBy=raw_seven_day_sales&sortOrder=desc`);
+                const { data, pagination } = await response.json();
+                
+                if (!data || !pagination) {
+                    throw new Error('Invalid data format received from server');
+                }
+
+                // Update pagination info
+                currentPage = pagination.currentPage;
+                totalPages = pagination.totalPages;
+                
+                // Update UI
+                if (data.length === 0) {
+                    const table = document.querySelector('.stats-table');
+                    table.querySelectorAll('tbody').forEach(tbody => tbody.remove());
+                    table.insertAdjacentHTML('beforeend', `
+                        <tbody>
+                            <tr>
+                                <td colspan="10" class="empty-state">
+                                    No data found for the current page
+                                </td>
+                            </tr>
+                        </tbody>
+                    `);
+                } else {
+                    updateTable(data);
+                }
+                
+                // Update pagination UI
+                document.getElementById('currentPage').textContent = currentPage;
+                document.getElementById('totalPages').textContent = totalPages;
+                
+                // Update button states
+                document.getElementById('firstPage').disabled = currentPage <= 1;
+                document.getElementById('prevPage').disabled = currentPage <= 1;
+                document.getElementById('nextPage').disabled = currentPage >= totalPages;
             } catch (error) {
                 console.error('Error fetching data:', error);
+            } finally {
+                hideLoading();
+                window.scrollTo(0, 0);
             }
         }
 
         // Initial load
         fetchData();
+
+        document.getElementById('firstPage').addEventListener('click', () => {
+            if (currentPage !== 1) {
+                fetchData(1);
+            }
+        });
+
+        // Rest of your event listeners remain the same
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 1) {
+                fetchData(currentPage - 1);
+            }
+        });
+
+        document.getElementById('nextPage').addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                fetchData(currentPage + 1);
+            }
+        });
+
+        function updateTable(data) {
+            const table = document.querySelector('.stats-table');
+            // Clear existing content
+            table.querySelectorAll('tbody').forEach(tbody => tbody.remove());
+            // Add new data
+            data.forEach(item => {
+                table.insertAdjacentHTML('beforeend', renderCard(item));
+            });
+        }
     </script>
 </body>
 </html>
