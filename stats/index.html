@@ -1,0 +1,312 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rookie Card Prices and Analytics</title>
+    <meta name="title" content="NBA Rookie Card Prices and Analytics">
+    <meta name="description" content="Track NBA rookie card market trends, prices, and sales volumes. Real-time analytics for basketball cards with detailed price history and market performance.">
+
+    <!-- Additional SEO Meta Tags -->
+    <meta name="keywords" content="sports cards, basketball cards, card market, card prices, trading cards, card analytics, market stats">
+    <meta name="author" content="sportscard360">
+    <meta name="robots" content="index, follow">
+    <style>
+        .stats-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 20px 0;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+
+        .stats-table th, .stats-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.875rem;
+        }
+
+        .stats-table td.number {
+            text-align: right;
+        }
+
+        .stats-table th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #4b5563;
+            white-space: nowrap;
+        }
+
+        .player-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .player-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .grade-badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+
+        .grade-raw { background: #f3f4f6; color: #374151; }
+        .grade-psa10 { background: #dcfce7; color: #166534; }
+        .grade-psa9 { background: #dbeafe; color: #1e40af; }
+
+        .percentage {
+            font-size: 0.75rem;
+        }
+
+        .percentage.positive { color: #059669; }
+        .percentage.negative { color: #dc2626; }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 20px;
+        }
+
+        .card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .set-name {
+            font-weight: 500;
+        }
+
+        .parallel-name {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        .stats-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="table-container">
+        <table class="stats-table">
+            <thead>
+                <tr>
+                    <th rowspan="2">Player</th>
+                    <th rowspan="2">Set / Parallel</th>
+                    <th rowspan="2">Card #</th>
+                    <th rowspan="2">Grade</th>
+                    <th colspan="3">7 Day Stats</th>
+                    <th colspan="3">30 Day Stats</th>
+                </tr>
+                <tr>
+                    <th>Sales</th>
+                    <th>Volume</th>
+                    <th>Avg Price</th>
+                    <th>Sales</th>
+                    <th>Volume</th>
+                    <th>Avg Price</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Data will be populated here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function formatPrice(price) {
+            return new Intl.NumberFormat('en-US', { 
+                style: 'currency', 
+                currency: 'USD',
+                maximumFractionDigits: 2
+            }).format(price);
+        }
+
+        function formatNumber(num) {
+            return new Intl.NumberFormat().format(num);
+        }
+
+        function calculatePercentageChange(current, previous) {
+            if (!previous) return 0;
+            return ((current - previous) / previous) * 100;
+        }
+
+        function createPercentageElement(value) {
+            if (!value) return '';
+            const sign = value > 0 ? '+' : '';
+            const className = value > 0 ? 'positive' : value < 0 ? 'negative' : '';
+            const arrow = value > 0 ? '↑' : value < 0 ? '↓' : '';
+            return `<div class="percentage ${className}">${arrow} ${sign}${value.toFixed(1)}%</div>`;
+        }
+
+        function renderCard(data) {
+            return `
+                <!-- Raw card row -->
+                <tr>
+                    <td rowspan="3">
+                        <div class="player-cell">
+                            <img src="${data.avatar || '/api/placeholder/40/40'}" class="player-avatar" alt="${data.player_name}">
+                            <span>${data.player_name}</span>
+                        </div>
+                    </td>
+                    <td rowspan="3">
+                        <div class="card-info">
+                            <span class="set-name">${data.set_year} ${data.set_name}</span>
+                            ${data.parallel ? `<span class="parallel-name">${data.parallel}</span>` : ''}
+                        </div>
+                    </td>
+                    <td rowspan="3">${data.card_number}</td>
+                    <td><span class="grade-badge grade-raw">Raw</span></td>
+                    <td class="number">
+                        <div class="stats-group">
+                            <div>${formatNumber(data.raw_seven_day_sales)}</div>
+                            ${createPercentageElement(calculatePercentageChange(data.raw_seven_day_sales, data.raw_prev_seven_day_sales))}
+                        </div>
+                    </td>
+                    <td class="number">
+                        <div class="stats-group">
+                            <div>${formatPrice(data.raw_seven_day_volume)}</div>
+                            ${createPercentageElement(calculatePercentageChange(data.raw_seven_day_volume, data.raw_prev_seven_day_volume))}
+                        </div>
+                    </td>
+                    <td class="number">
+                        <div class="stats-group">
+                            <div>${formatPrice(data.raw_seven_day_avg_price)}</div>
+                            ${createPercentageElement(calculatePercentageChange(data.raw_seven_day_avg_price, data.raw_prev_seven_day_avg_price))}
+                        </div>
+                    </td>
+                    <td class="number">
+                        <div class="stats-group">
+                            <div>${formatNumber(data.raw_thirty_day_sales)}</div>
+                            ${createPercentageElement(calculatePercentageChange(data.raw_thirty_day_sales, data.raw_prev_thirty_day_sales))}
+                        </div>
+                    </td>
+                    <td class="number">
+                        <div class="stats-group">
+                            <div>${formatPrice(data.raw_thirty_day_volume)}</div>
+                            ${createPercentageElement(calculatePercentageChange(data.raw_thirty_day_volume, data.raw_prev_thirty_day_volume))}
+                        </div>
+                    </td>
+                    <td class="number">
+                        <div class="stats-group">
+                            <div>${formatPrice(data.raw_thirty_day_avg_price)}</div>
+                            ${createPercentageElement(calculatePercentageChange(data.raw_thirty_day_avg_price, data.raw_prev_thirty_day_avg_price))}
+                        </div>
+                    </td>
+                </tr>
+                
+                <!-- PSA 10 row -->
+                <tr>
+                    <td><span class="grade-badge grade-psa10">PSA 10</span></td>
+                    <td class="number">
+                        <div class="stats-group">
+                            <div>${formatNumber(data.psa10_seven_day_sales)}</div>
+                            ${createPercentageElement(calculatePercentageChange(data.psa10_seven_day_sales, data.psa10_prev_seven_day_sales))}
+                        </div>
+                    </td>
+                    <td class="number">
+                        <div class="stats-group">
+                            <div>${formatPrice(data.psa10_seven_day_volume)}</div>
+                            ${createPercentageElement(calculatePercentageChange(data.psa10_seven_day_volume, data.psa10_prev_seven_day_volume))}
+                        </div>
+                    </td>
+                    <td class="number">
+                        <div class="stats-group">
+                            <div>${formatPrice(data.psa10_seven_day_avg_price)}</div>
+                            ${createPercentageElement(calculatePercentageChange(data.psa10_seven_day_avg_price, data.psa10_prev_seven_day_avg_price))}
+                        </div>
+                    </td>
+                    <td class="number">
+                        <div class="stats-group">
+                            <div>${formatNumber(data.psa10_thirty_day_sales)}</div>
+                            ${createPercentageElement(calculatePercentageChange(data.psa10_thirty_day_sales, data.psa10_prev_thirty_day_sales))}
+                        </div>
+                    </td>
+                    <td class="number">
+                        <div class="stats-group">
+                            <div>${formatPrice(data.psa10_thirty_day_volume)}</div>
+                            ${createPercentageElement(calculatePercentageChange(data.psa10_thirty_day_volume, data.psa10_prev_thirty_day_volume))}
+                        </div>
+                    </td>
+                    <td class="number">
+                        <div class="stats-group">
+                            <div>${formatPrice(data.psa10_thirty_day_avg_price)}</div>
+                            ${createPercentageElement(calculatePercentageChange(data.psa10_thirty_day_avg_price, data.psa10_prev_thirty_day_avg_price))}
+                        </div>
+                    </td>
+                </tr>
+                
+                <!-- PSA 9 row -->
+                <tr>
+                    <td><span class="grade-badge grade-psa9">PSA 9</span></td>
+                    <td class="number">
+                        <div class="stats-group">
+                            <div>${formatNumber(data.psa9_seven_day_sales)}</div>
+                            ${createPercentageElement(calculatePercentageChange(data.psa9_seven_day_sales, data.psa9_prev_seven_day_sales))}
+                        </div>
+                    </td>
+                    <td class="number">
+                        <div class="stats-group">
+                            <div>${formatPrice(data.psa9_seven_day_volume)}</div>
+                            ${createPercentageElement(calculatePercentageChange(data.psa9_seven_day_volume, data.psa9_prev_seven_day_volume))}
+                        </div>
+                    </td>
+                    <td class="number">
+                        <div class="stats-group">
+                            <div>${formatPrice(data.psa9_seven_day_avg_price)}</div>
+                            ${createPercentageElement(calculatePercentageChange(data.psa9_seven_day_avg_price, data.psa9_prev_seven_day_avg_price))}
+                        </div>
+                    </td>
+                    <td class="number">
+                        <div class="stats-group">
+                            <div>${formatNumber(data.psa9_thirty_day_sales)}</div>
+                            ${createPercentageElement(calculatePercentageChange(data.psa9_thirty_day_sales, data.psa9_prev_thirty_day_sales))}
+                        </div>
+                    </td>
+                    <td class="number">
+                        <div class="stats-group">
+                            <div>${formatPrice(data.psa9_thirty_day_volume)}</div>
+                            ${createPercentageElement(calculatePercentageChange(data.psa9_thirty_day_volume, data.psa9_prev_thirty_day_volume))}
+                        </div>
+                    </td>
+                    <td class="number">
+                        <div class="stats-group">
+                            <div>${formatPrice(data.psa9_thirty_day_avg_price)}</div>
+                            ${createPercentageElement(calculatePercentageChange(data.psa9_thirty_day_avg_price, data.psa9_prev_thirty_day_avg_price))}
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Example of how to use the rendered data
+        async function fetchData() {
+            try {
+                const response = await fetch('https://card-stats-api.notundefinedorg.workers.dev?sortBy=raw_seven_day_sales&sortOrder=desc&pageSize=100');
+                const data = await response.json();
+                const tableBody = document.getElementById('tableBody');
+                tableBody.innerHTML = data.data.map(renderCard).join('');
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        // Initial load
+        fetchData();
+    </script>
+</body>
+</html>
